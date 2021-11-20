@@ -14,3 +14,8 @@ Average time required to solve 10000 puzzles by difficulty (only counted if 100%
 - medium: -
 - hard: -
 - diabolical: -
+
+Todo:
+- adding as many advanced solving techniques as possible
+- option to display techniques which software needed to solve the puzzle
+- gui (may never happen, I hate working with ui)
