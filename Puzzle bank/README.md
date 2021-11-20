@@ -1,7 +1,7 @@
 # Sudoku Exchange "Puzzle Bank"
 
 This entire folder and readme file was taken directly from: https://github.com/grantm/sudoku-exchange-puzzle-bank
-I also wrote a converter to change the original files, such as "easy.txt". You can see the results of conversion in files names "xxx_converted.txt".
+I also wrote a converter to change the original files, such as "easy.txt". You can see the results of conversion in files named "xxx_converted.txt".
 
 This repository contains several hundred thousand Sudoku puzzles that were
 computer generated for use by the [Sudoku Exchange](https://sudokuexchange.com/)
