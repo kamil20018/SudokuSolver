@@ -5,7 +5,7 @@ Puzzles used to test the software were taken from this repository: https://githu
 
 Current performance status:
 - 100% of easy sudokus solved
-- 70% of medium sudokus solved
+- 93% of medium sudokus solved
 - 0% of hard sudokus solved
 - 0% of diabolical sudokus solved
 
