@@ -5,8 +5,8 @@ Puzzles used to test the software were taken from this repository: https://githu
 
 Current performance status:
 - 100% of easy sudokus solved
-- 93% of medium sudokus solved
-- 0% of hard sudokus solved
+- 99% of medium sudokus solved
+- 31% of hard sudokus solved
 - 0% of diabolical sudokus solved
 
 Average time required to solve 10000 puzzles by difficulty (only counted if 100% of puzzles were solved):
