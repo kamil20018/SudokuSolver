@@ -4,7 +4,7 @@ from constants import *
 def remove_candidates(board):
     for row in range(BOARD_SIZE):
         for column in range(BOARD_SIZE):
-            if(len(board[row][column]) != 1):
+            if len(board[row][column]) != 1:
                 candidates = board[row][column].copy()
                 for index in range(BOARD_SIZE):
                     #remove candidates using row
@@ -26,10 +26,10 @@ def remove_candidates(board):
         for col_mult in range(3):
             for row in range(3):
                 for column in range(3):
-                    if(len(board[row + 3 * row_mult][column + 3 * col_mult]) == 1):
+                    if len(board[row + 3 * row_mult][column + 3 * col_mult]) == 1:
                         for act_row in range(3 * row_mult, 3 * (row_mult + 1)):
                             for act_column in range(3 * col_mult, 3 * (col_mult + 1)):
-                                if(len(board[act_row][act_column]) != 1):
+                                if len(board[act_row][act_column]) != 1:
                                     try:
                                         board[act_row][act_column].remove(board[row + 3 * row_mult][column + 3 * col_mult][0])
                                     except ValueError:
@@ -39,13 +39,13 @@ def remove_candidates(board):
 def update_candidates(board, given_row, given_column, number):
     for row in range(BOARD_SIZE):
         try:
-            if(row != given_row):
+            if row != given_row:
                 board[row][given_column].remove(number)
         except ValueError:
             pass
     for column in range(BOARD_SIZE):
         try:
-            if(column != given_column):
+            if column != given_column:
                 board[given_row][column].remove(number)
         except ValueError:
             pass
@@ -56,7 +56,7 @@ def update_candidates(board, given_row, given_column, number):
     for row in range(box_row * 3, (box_row + 1) * 3):
         for column in range(box_column * 3, (box_column + 1) * 3):
             try:
-                if(row != given_row and column != given_column):
+                if row != given_row and column != given_column:
                     board[row][column].remove(number)
             except ValueError:
                 pass
@@ -70,7 +70,7 @@ def hidden_single(board):
             for column in range(BOARD_SIZE):
                 if number in board[row][column]:       
                     occurs_at.append(column)
-            if(len(occurs_at) == 1):
+            if len(occurs_at) == 1:
                 board[row][occurs_at[0]] = [number]
                 update_candidates(board, row, occurs_at[0], number)
 
@@ -81,7 +81,7 @@ def hidden_single(board):
             for row in range(BOARD_SIZE):
                 if number in board[row][column]:       
                     occurs_at.append(row)
-            if(len(occurs_at) == 1):
+            if len(occurs_at) == 1:
                 board[occurs_at[0]][column] = [number]
                 update_candidates(board, occurs_at[0], column, number)     
 
@@ -94,9 +94,88 @@ def hidden_single(board):
                     for column in range(col_mult * 3, (col_mult + 1) * 3):  
                         if number in board[row][column]:       
                             occurs_at.append([row, column])
-                if(len(occurs_at) == 1):
+                if len(occurs_at) == 1:
                     board[occurs_at[0][0]][occurs_at[0][1]] = [number]
                     update_candidates(board, occurs_at[0][0], occurs_at[0][1], number)
     
-def locked_candidates(board):
-    pass
+def locked_candidates_pointing(board):
+    for row_mult in range(3):
+        for col_mult in range(3):
+            for number in range(1, 10):
+                occurs_at = []
+                for row in range(row_mult * 3, (row_mult + 1) * 3):
+                    for column in range(col_mult * 3, (col_mult + 1) * 3):
+                        if number in board[row][column] or board[row][column] == [number]:   
+                            occurs_at.append([row, column])
+                if len(occurs_at) >= 2 and len(occurs_at) <= 3:
+                    pos_row = occurs_at[0][0]
+                    same_row = True
+                    pos_col = occurs_at[0][1]
+                    same_col = True
+                    for pos in occurs_at:
+                        if(pos_row != pos[0]):
+                            same_row = False
+                        if(pos_col != pos[1]):
+                            same_col = False
+                    if same_row:
+                        for box_col in range(3):
+                            if box_col != col_mult:
+                                for col_del in range(3):
+                                    try:
+                                        board[pos_row][box_col * 3 + col_del].remove(number)
+                                    except ValueError:
+                                            pass
+                    if same_col:
+                        for box_row in range(3):
+                            if box_row != row_mult:
+                                for row_del in range(3):
+                                    try:
+                                        board[box_row * 3 + row_del][pos_col].remove(number)
+                                    except ValueError:
+                                            pass
+
+def locked_candidates_claiming(board):
+    for row in range(BOARD_SIZE):
+        for number in range(1, 10):
+            occurs_at = []
+            for column in range(BOARD_SIZE):
+                if number in board[row][column]:
+                    occurs_at.append(column)
+            if len(occurs_at) >= 2 and len(occurs_at) <= 3:
+                same_box = True
+                col_pos = occurs_at[0]
+                for pos in occurs_at:
+                    if(pos // 3 != col_pos // 3):
+                        same_box = False
+                        break
+                if same_box:
+                    for box_row in range(3 * (row // 3), 3 * (row // 3 + 1)):
+                        for box_col in range(3 * (col_pos // 3), 3 * (col_pos // 3 + 1)):
+                            if box_row != row:
+                                try:
+                                    board[box_row][box_col].remove(number)
+                                except ValueError:
+                                    pass
+    
+    for column in range(BOARD_SIZE):
+        for number in range(1, 10):
+            occurs_at = []
+            for row in range(BOARD_SIZE):
+                if number in board[row][column]:
+                    occurs_at.append(row)
+            if len(occurs_at) >= 2 and len(occurs_at) <= 3:
+                same_box = True
+                row_pos = occurs_at[0]
+                for pos in occurs_at:
+                    if(pos // 3 != row_pos // 3):
+                        same_box = False
+                        break
+                if same_box:
+                    for box_col in range(3 * (column // 3), 3 * (column // 3 + 1)):
+                        for box_row in range(3 * (row_pos // 3), 3 * (row_pos // 3 + 1)):
+                            if box_col != column:
+                                try:
+                                    board[box_row][box_col].remove(number)
+                                except ValueError:
+                                    pass
+                                

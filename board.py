@@ -32,6 +32,13 @@ class Board:
                 if(len(self.board[row][column]) != 1): return False
         return True
     
+    def is_proper(self):
+        for row in range(BOARD_SIZE):
+            for column in range(BOARD_SIZE):
+                if(len(self.board[row][column]) < 1): return False
+        return True
+
     def print(self):
         for line in self.board:
             print([x[0] if len(x) == 1 else x for x in line])
+            

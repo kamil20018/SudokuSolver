@@ -23,3 +23,4 @@ def convert_sudoku_files():
                     f2.write(str(x + 1) + " " + line + "\n")
 def strip_sudoku(sudoku):
     return sudoku.split()[1]
+    
