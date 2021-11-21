@@ -3,7 +3,7 @@ from board import *
 from techniques import *  
 from engine import *
 
-AMOUNT_TO_SOLVE = 100
+AMOUNT_TO_SOLVE = 1000
 
 def test_single(str):
     board = Board(str)

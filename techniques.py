@@ -178,4 +178,75 @@ def locked_candidates_claiming(board):
                                     board[box_row][box_col].remove(number)
                                 except ValueError:
                                     pass
-                                
+
+def naked_pair(board):
+    #box
+    for row_mult in range(3):
+        for col_mult in range(3):
+            pairs = []
+            for row in range(row_mult * 3, (row_mult + 1) * 3):
+                for column in range(col_mult * 3, (col_mult + 1) * 3):  
+                    if len(board[row][column]) == 2:
+                        pairs.append([board[row][column], [row, column]]) #stores a pair of numbers and their position
+            for x in range(len(pairs)):
+                for y in range(len(pairs)):
+                    if x != y and pairs[x][0] == pairs[y][0]:
+                        first_removable = pairs[x][0][0]
+                        second_removable = pairs[x][0][1]
+                        for row in range(row_mult * 3, (row_mult + 1) * 3):
+                            for column in range(col_mult * 3, (col_mult + 1) * 3): 
+                                if [row, column] not in [pairs[x][1], pairs[y][1]]:
+                                    try:
+                                        board[row][column].remove(first_removable)
+                                    except ValueError:
+                                            pass
+                                    try:
+                                        board[row][column].remove(second_removable)
+                                    except ValueError:
+                                            pass
+
+    #row
+    for row in range(BOARD_SIZE):
+        pairs = []
+        for column in range(BOARD_SIZE):
+            if len(board[row][column]) == 2:
+                pairs.append([board[row][column], [row, column]])
+        for x in range(len(pairs)):
+            for y in range(len(pairs)):
+                if x != y and pairs[x][0] == pairs[y][0]:
+                    first_removable = pairs[x][0][0]
+                    second_removable = pairs[x][0][1]
+                    for col in range(BOARD_SIZE):
+                        if col != pairs[x][1][1] and col != pairs[y][1][1]:
+                            try:
+                                board[row][col].remove(second_removable)
+                            except ValueError:
+                                pass
+
+                            try:
+                                board[row][col].remove(first_removable)
+                            except ValueError:
+                                pass
+                      
+    #column
+    for column in range(BOARD_SIZE):
+        pairs = []
+        for row in range(BOARD_SIZE):
+            if len(board[row][column]) == 2:
+                pairs.append([board[row][column], [row, column]])
+        for x in range(len(pairs)):
+            for y in range(len(pairs)):
+                if x != y and pairs[x][0] == pairs[y][0]:
+                    first_removable = pairs[x][0][0]
+                    second_removable = pairs[x][0][1]
+                    for new_row in range(BOARD_SIZE):
+                        if new_row != pairs[x][1][0] and new_row != pairs[y][1][0]:
+                            try:
+                                board[new_row][column].remove(first_removable)
+                            except ValueError:
+                                pass
+                            try:
+                                board[new_row][column].remove(second_removable)
+                            except ValueError:
+                                pass
+                            
