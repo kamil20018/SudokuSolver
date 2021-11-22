@@ -15,7 +15,9 @@ not_complete = 0
 empty = 0
 not_complete_ones = []
 empty_ones = []
-with open('Puzzle bank\medium_converted.txt', 'r') as f:
+
+#test_single("....9.6../.....657./..4....81/.2..43.../1..5.9..7/...17..6./35....2../.712...../..6.1....")
+with open('Puzzle bank\hard_converted.txt', 'r') as f:
     sudokus = f.readlines()
     index = 1
     for sudoku in sudokus:
@@ -35,5 +37,12 @@ with open('Puzzle bank\medium_converted.txt', 'r') as f:
 
 
 print("correct: {}, not_complete: {}, empty: {}".format(correct, not_complete, empty))
-print(not_complete_ones)
-print(empty_ones)
+if len(not_complete_ones) > 12:
+    print(not_complete_ones[:11])
+else:
+    print(not_complete_ones)
+if len(empty_ones) > 12:
+    print(empty_ones[:11])
+else:
+    print(empty_ones)
+

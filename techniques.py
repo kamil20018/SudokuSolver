@@ -1,27 +1,29 @@
 from constants import *
 
-#basic candidate removal using sudoku rules
+# basic candidate removal using sudoku rules
+
+
 def remove_candidates(board):
     for row in range(BOARD_SIZE):
         for column in range(BOARD_SIZE):
             if len(board[row][column]) != 1:
                 candidates = board[row][column].copy()
                 for index in range(BOARD_SIZE):
-                    #remove candidates using row
+                    # remove candidates using row
                     if len(board[row][index]) == 1:
                         try:
                             candidates.remove(board[row][index][0])
                         except ValueError:
                             pass
-                    #remove candidates column
+                    # remove candidates column
                     if len(board[index][column]) == 1:
                         try:
                             candidates.remove(board[index][column][0])
                         except ValueError:
                             pass
                 board[row][column] = candidates.copy()
-                
-    #remove candidates from box
+
+    # remove candidates from box
     for row_mult in range(3):
         for col_mult in range(3):
             for row in range(3):
@@ -31,11 +33,14 @@ def remove_candidates(board):
                             for act_column in range(3 * col_mult, 3 * (col_mult + 1)):
                                 if len(board[act_row][act_column]) != 1:
                                     try:
-                                        board[act_row][act_column].remove(board[row + 3 * row_mult][column + 3 * col_mult][0])
+                                        board[act_row][act_column].remove(
+                                            board[row + 3 * row_mult][column + 3 * col_mult][0])
                                     except ValueError:
                                         pass
 
-#updates the other candidates in case a digit was placed
+# updates the other candidates in case a digit was placed
+
+
 def update_candidates(board, given_row, given_column, number):
     for row in range(BOARD_SIZE):
         try:
@@ -61,43 +66,47 @@ def update_candidates(board, given_row, given_column, number):
             except ValueError:
                 pass
 
-#searches for hidden singles
+# searches for hidden singles
+
+
 def hidden_single(board):
-    #check for hidden single in a row
+    # check for hidden single in a row
     for row in range(BOARD_SIZE):
         for number in range(1, 10):
             occurs_at = []
             for column in range(BOARD_SIZE):
-                if number in board[row][column]:       
+                if number in board[row][column]:
                     occurs_at.append(column)
             if len(occurs_at) == 1:
                 board[row][occurs_at[0]] = [number]
                 update_candidates(board, row, occurs_at[0], number)
 
-    #check for hidden single in a column
+    # check for hidden single in a column
     for column in range(BOARD_SIZE):
         for number in range(1, 10):
             occurs_at = []
             for row in range(BOARD_SIZE):
-                if number in board[row][column]:       
+                if number in board[row][column]:
                     occurs_at.append(row)
             if len(occurs_at) == 1:
                 board[occurs_at[0]][column] = [number]
-                update_candidates(board, occurs_at[0], column, number)     
+                update_candidates(board, occurs_at[0], column, number)
 
-    #check for hidden single in a box   
+    # check for hidden single in a box
     for row_mult in range(3):
         for col_mult in range(3):
             for number in range(1, 10):
                 occurs_at = []
                 for row in range(row_mult * 3, (row_mult + 1) * 3):
-                    for column in range(col_mult * 3, (col_mult + 1) * 3):  
-                        if number in board[row][column]:       
+                    for column in range(col_mult * 3, (col_mult + 1) * 3):
+                        if number in board[row][column]:
                             occurs_at.append([row, column])
                 if len(occurs_at) == 1:
                     board[occurs_at[0][0]][occurs_at[0][1]] = [number]
-                    update_candidates(board, occurs_at[0][0], occurs_at[0][1], number)
-    
+                    update_candidates(
+                        board, occurs_at[0][0], occurs_at[0][1], number)
+
+
 def locked_candidates_pointing(board):
     for row_mult in range(3):
         for col_mult in range(3):
@@ -105,7 +114,7 @@ def locked_candidates_pointing(board):
                 occurs_at = []
                 for row in range(row_mult * 3, (row_mult + 1) * 3):
                     for column in range(col_mult * 3, (col_mult + 1) * 3):
-                        if number in board[row][column] or board[row][column] == [number]:   
+                        if number in board[row][column] or board[row][column] == [number]:
                             occurs_at.append([row, column])
                 if len(occurs_at) >= 2 and len(occurs_at) <= 3:
                     pos_row = occurs_at[0][0]
@@ -122,17 +131,20 @@ def locked_candidates_pointing(board):
                             if box_col != col_mult:
                                 for col_del in range(3):
                                     try:
-                                        board[pos_row][box_col * 3 + col_del].remove(number)
+                                        board[pos_row][box_col * 3 +
+                                                       col_del].remove(number)
                                     except ValueError:
-                                            pass
+                                        pass
                     if same_col:
                         for box_row in range(3):
                             if box_row != row_mult:
                                 for row_del in range(3):
                                     try:
-                                        board[box_row * 3 + row_del][pos_col].remove(number)
+                                        board[box_row * 3 +
+                                              row_del][pos_col].remove(number)
                                     except ValueError:
-                                            pass
+                                        pass
+
 
 def locked_candidates_claiming(board):
     for row in range(BOARD_SIZE):
@@ -156,7 +168,7 @@ def locked_candidates_claiming(board):
                                     board[box_row][box_col].remove(number)
                                 except ValueError:
                                     pass
-    
+
     for column in range(BOARD_SIZE):
         for number in range(1, 10):
             occurs_at = []
@@ -179,33 +191,37 @@ def locked_candidates_claiming(board):
                                 except ValueError:
                                     pass
 
+
 def naked_pair(board):
-    #box
+    # box
     for row_mult in range(3):
         for col_mult in range(3):
             pairs = []
             for row in range(row_mult * 3, (row_mult + 1) * 3):
-                for column in range(col_mult * 3, (col_mult + 1) * 3):  
+                for column in range(col_mult * 3, (col_mult + 1) * 3):
                     if len(board[row][column]) == 2:
-                        pairs.append([board[row][column], [row, column]]) #stores a pair of numbers and their position
+                        # stores a pair of numbers and their position
+                        pairs.append([board[row][column], [row, column]])
             for x in range(len(pairs)):
                 for y in range(len(pairs)):
                     if x != y and pairs[x][0] == pairs[y][0]:
                         first_removable = pairs[x][0][0]
                         second_removable = pairs[x][0][1]
                         for row in range(row_mult * 3, (row_mult + 1) * 3):
-                            for column in range(col_mult * 3, (col_mult + 1) * 3): 
+                            for column in range(col_mult * 3, (col_mult + 1) * 3):
                                 if [row, column] not in [pairs[x][1], pairs[y][1]]:
                                     try:
-                                        board[row][column].remove(first_removable)
+                                        board[row][column].remove(
+                                            first_removable)
                                     except ValueError:
-                                            pass
+                                        pass
                                     try:
-                                        board[row][column].remove(second_removable)
+                                        board[row][column].remove(
+                                            second_removable)
                                     except ValueError:
-                                            pass
+                                        pass
 
-    #row
+    # row
     for row in range(BOARD_SIZE):
         pairs = []
         for column in range(BOARD_SIZE):
@@ -227,8 +243,8 @@ def naked_pair(board):
                                 board[row][col].remove(first_removable)
                             except ValueError:
                                 pass
-                      
-    #column
+
+    # column
     for column in range(BOARD_SIZE):
         pairs = []
         for row in range(BOARD_SIZE):
@@ -249,4 +265,59 @@ def naked_pair(board):
                                 board[new_row][column].remove(second_removable)
                             except ValueError:
                                 pass
-                            
+
+
+def hidden_pair(board):
+    # box
+    def handle_pairs(pairs):
+        if len(pairs) > 1:
+            for x in range(len(pairs)):
+                for y in range(x):
+                    s1 = {pairs[x][0][0], pairs[x][1][0]}
+                    s2 = {pairs[y][0][0], pairs[y][1][0]}
+                    if x != y and s1 == s2:
+                        notRemovable = [pairs[x][0][1], pairs[y][0][1]]
+                        for number in range(1, 10):
+                            if number not in notRemovable:
+                                for pos in s1:
+                                    try:
+                                        board[pos[0]][pos[1]].remove(
+                                            number)
+                                    except ValueError:
+                                        pass
+    for row_mult in range(3):
+        for col_mult in range(3):
+            pairs = []
+            for number in range(1, 10):
+                occursAt = []
+                for row in range(row_mult * 3, (row_mult + 1) * 3):
+                    for column in range(col_mult * 3, (col_mult + 1) * 3):
+                        if number in board[row][column]:
+                            occursAt.append([(row, column), number])
+                if len(occursAt) == 2:
+                    pairs.append(occursAt.copy())
+            handle_pairs(pairs)
+
+    # row
+    for row in range(BOARD_SIZE):
+        pairs = []
+        for number in range(1, 10):
+            occursAt = []
+            for column in range(BOARD_SIZE):
+                if number in board[row][column]:
+                        occursAt.append([(row, column), number])
+            if len(occursAt) == 2:
+                    pairs.append(occursAt.copy())
+        handle_pairs(pairs)
+        
+    # column
+    for column in range(BOARD_SIZE):
+        pairs = []
+        for number in range(1, 10):
+            occursAt = []
+            for row in range(BOARD_SIZE):
+                if number in board[row][column]:
+                        occursAt.append([(row, column), number])
+            if len(occursAt) == 2:
+                    pairs.append(occursAt.copy())
+        handle_pairs(pairs)
