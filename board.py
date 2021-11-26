@@ -7,6 +7,8 @@ class Board:
         self.board = self.fill_candidates(self.board)
 
     def string_to_num(self, board_string):
+        if len(board_string) == 1: #sudoku in the format without "/" can still be parsed
+            board_string = [board_string[0][i:i+9] for i in range(0, len(board_string[0]), 9)]
         board = []
         for row in board_string:
             line = []
@@ -17,6 +19,7 @@ class Board:
                     line.append([int(char)])
             board.append(line)
         return board
+        
 
     def fill_candidates(self, board):
         candidates = [x for x in range(1, 10)]
