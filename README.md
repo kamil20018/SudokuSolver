@@ -8,16 +8,17 @@ Implemented techniques:
 - locked candidates (pointing and claiming)
 - naked pairs
 - hidden pairs
+- x-wing
 
 Current performance status:
 - 100% of easy sudokus solved
-- 99% of medium sudokus solved
-- 41% of hard sudokus solved
+- 100% of medium sudokus solved
+- 42% of hard sudokus solved
 - 0% of diabolical sudokus solved
 
 Average time required to solve 10000 puzzles by difficulty (only counted if 100% of puzzles were solved):
 - easy: 35s
-- medium: -
+- medium: 58s
 - hard: -
 - diabolical: -
 
