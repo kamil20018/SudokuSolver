@@ -33,6 +33,15 @@ def get_number_in_box(board, number, row_mult, col_mult, format):
     return occurs_at
 
 
+def get_n_valued_cells(board, n):
+    cells = []
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            if len(board[row][col]) == n:
+                cells.append([[row, col], board[row][col]])
+    return cells
+
+
 def remove_candidates(board):
     for row in range(BOARD_SIZE):
         for col in range(BOARD_SIZE):
@@ -214,15 +223,10 @@ def naked_pair(board):
                     second_rem = pairs[x][0][1]
                     for col in range(BOARD_SIZE):
                         if col != pairs[x][1][1] and col != pairs[y][1][1]:
-                            try:
+                            if second_rem in board[row][col]:
                                 board[row][col].remove(second_rem)
-                            except ValueError:
-                                pass
-
-                            try:
+                            if first_rem in board[row][col]:
                                 board[row][col].remove(first_rem)
-                            except ValueError:
-                                pass
 
     # column
     for col in range(BOARD_SIZE):
@@ -237,14 +241,10 @@ def naked_pair(board):
                     second_rem = pairs[x][0][1]
                     for new_row in range(BOARD_SIZE):
                         if new_row != pairs[x][1][0] and new_row != pairs[y][1][0]:
-                            try:
+                            if first_rem in board[new_row][col]:
                                 board[new_row][col].remove(first_rem)
-                            except ValueError:
-                                pass
-                            try:
+                            if second_rem in board[new_row][col]:
                                 board[new_row][col].remove(second_rem)
-                            except ValueError:
-                                pass
 
 
 def hidden_pair(board):
@@ -319,16 +319,10 @@ def x_wing(board):
                             #elim number from columns: occurs_at       not elim from rows: row and y, 
                             for cell in range(BOARD_SIZE):
                                 if cell not in [row, y]:
-                                    try:
-                                        board[cell][occurs_at[0]].remove(
-                                                number)
-                                    except ValueError:
-                                        pass
-                                    try:
-                                        board[cell][occurs_at[1]].remove(
-                                                number)
-                                    except ValueError:
-                                        pass
+                                    if number in board[cell][occurs_at[0]]:
+                                        board[cell][occurs_at[0]].remove(number)
+                                    if number in board[cell][occurs_at[1]]:
+                                        board[cell][occurs_at[1]].remove(number)
                     if correct: 
                         break
     #horizontal elimination
@@ -346,16 +340,52 @@ def x_wing(board):
                             #elim number from columns: occurs_at       not elim from rows: row and x, 
                             for cell in range(BOARD_SIZE):
                                 if cell not in [col, x]:
-                                    try:
-                                        board[occurs_at[0]][cell].remove(
-                                                number)
-                                    except ValueError:
-                                        pass
-                                    try:
-                                        board[occurs_at[1]][cell].remove(
-                                                number)
-                                    except ValueError:
-                                        pass
+                                    if number in board[occurs_at[0]][cell]:
+                                        board[occurs_at[0]][cell].remove(number)
+                                    if number in board[occurs_at[1]][cell]:
+                                        board[occurs_at[1]][cell].remove(number)
                     if correct: 
                         break
-                        
+
+
+def skyscraper(board):
+    #horizontal
+    for number in range(1, 10):
+        for row_1 in range(BOARD_SIZE - 1):
+            occurs_at_1 = get_number_in_row(board, number, row_1, format = 1)
+            if len(occurs_at_1) == 2:
+                for row_2 in range(row_1 + 1, BOARD_SIZE):
+                    occurs_at_2 = get_number_in_row(board, number, row_2, format = 1)
+                    if len(occurs_at_2) == 2 and len(set(occurs_at_1) | set(occurs_at_2)) == 3:
+                        base = (set(occurs_at_1) & set(occurs_at_2)).pop()
+                        col_1 = [x for x in occurs_at_1 if x != base][0]
+                        col_2 = [x for x in occurs_at_2 if x != base][0]
+                        box_1 = [row_1 // 3, col_1 // 3]
+                        box_2 = [row_2 // 3, col_2 // 3]
+                        if box_1[0] != box_2[0] and box_1[1] == box_2[1] and col_1 != col_2:
+                            for row in range((3 * box_1[0]), 3 * (box_1[0] + 1)):
+                                if number in board[row][col_2]:
+                                    board[row][col_2].remove(number)
+                            for row in range((3 * box_2[0]), 3 * (box_2[0] + 1)):
+                                if number in board[row][col_1]:
+                                    board[row][col_1].remove(number)
+    #vertical
+    for number in range(1, 10):
+        for col_1 in range(BOARD_SIZE - 1):
+            occurs_at_1 = get_number_in_column(board, number, col_1, format = 1)
+            if len(occurs_at_1) == 2:
+                for col_2 in range(col_1 + 1, BOARD_SIZE):
+                    occurs_at_2 = get_number_in_column(board, number, col_2, format = 1)
+                    if len(occurs_at_2) == 2 and len(set(occurs_at_1) | set(occurs_at_2)) == 3:
+                        base = (set(occurs_at_1) & set(occurs_at_2)).pop()
+                        row_1 = [x for x in occurs_at_1 if x != base][0]
+                        row_2 = [x for x in occurs_at_2 if x != base][0]
+                        box_1 = [row_1 // 3, col_1 // 3]
+                        box_2 = [row_2 // 3, col_2 // 3]
+                        if box_1[0] == box_2[0] and box_1[1] != box_2[1] and row_1 != row_2:
+                            for col in range((3 * box_1[1]), 3 * (box_1[1] + 1)):
+                                if number in board[row_2][col]:
+                                    board[row_2][col].remove(number)
+                            for col in range((3 * box_2[1]), 3 * (box_2[1] + 1)):
+                                if number in board[row_1][col]:
+                                    board[row_1][col].remove(number)

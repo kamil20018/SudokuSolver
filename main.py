@@ -16,7 +16,7 @@ empty = 0
 not_complete_ones = []
 empty_ones = []
 
-#test_single("1...7.....3.6....8..21..7...2.....394...8...258.....1...4..79..7....2.8.....6...5")
+#test_single("21.95...4/.9..6..37/...7...../......3.8/92.....15/8.5....../.....2.../68..1..4./1...47.96")
 with open('Puzzle bank\hard_converted.txt', 'r') as f:
     sudokus = f.readlines()
     index = 1
