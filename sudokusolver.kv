@@ -1,0 +1,57 @@
+#:import Factory kivy.factory.Factory
+
+<MyPopup@Popup>:
+    auto_dismiss: False
+    title: "Input a properly formatted sudoku"
+    size_hint: 0.6, 0.3
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Supported sudoku formats:"
+        Label:
+            text: "3.24.18.9/..1...3../........./.4.7.8.1./78.5.2.36/....9..../2..6.9..3/9.......8/8...7...5"
+        Label:
+            text: "3.24.18.9..1...3............4.7.8.1.78.5.2.36....9....2..6.9..39.......88...7...5"
+        TextInput:
+            id: sudoku_string
+            text: "..4.....25.8...7.1....3..6.95.47.......3.1.......82.75.6..2....2.9...4.38.....6.."
+        Button:
+            text: "Submit"
+            on_press: root.test(root.ids.sudoku_string.text)
+            on_release: root.dismiss()
+
+<MainWidget>:
+    BoxLayout:
+        size: root.width, root.height
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 0.05
+            Button:
+                text: "Load sudoku"
+                on_release: Factory.MyPopup().open()
+        BoxLayout:
+            id: sudoku
+            orientation: 'horizontal'
+
+
+<SudokuNav>:
+    size: root.width, root.height
+    BoxLayout:
+        size: root.width, root.height
+        pos: root.pos
+        orientation: 'vertical'
+        Label:
+            id: technique_info
+            text: 'Technique used to eliminate candidates will be displayed here'
+            text_size: self.width, None
+            size_hint: 1, 1
+            height: self.texture_size[1]
+        BoxLayout:
+            orientation: 'horizontal'
+            Button:
+                text: "prev"
+                on_press: root.prev()
+            Button:
+                text: "next"
+                on_press: root.next()

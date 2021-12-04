@@ -1,7 +1,8 @@
 from constants import *
 
 class Board:
-    def __init__(self, board_string):
+    def __init__(self, board_string, number):
+        self.number = number
         self.board_string = board_string.split("/")
         self.board = self.string_to_num(self.board_string)
         self.board = self.fill_candidates(self.board)

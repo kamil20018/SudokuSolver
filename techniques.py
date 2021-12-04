@@ -1,47 +1,8 @@
 from constants import *
+from getboardnumbers import *
+from itertools import *
 
-# basic candidate removal using sudoku rules
-
-def get_number_in_row(board, number, row, format):
-    occurs_at = []
-    for col in range(BOARD_SIZE):
-        if number in board[row][col]:
-            match format:
-                case 1:
-                    occurs_at.append(col)
-    return occurs_at
-
-
-def get_number_in_column(board, number, col, format):
-    occurs_at = []
-    for row in range(BOARD_SIZE):
-        if number in board[row][col]:
-            match format:
-                case 1:
-                    occurs_at.append(row)
-    return occurs_at
-
-
-def get_number_in_box(board, number, row_mult, col_mult, format):
-    occurs_at = []
-    for row in range(row_mult * 3, (row_mult + 1) * 3):
-        for col in range(col_mult * 3, (col_mult + 1) * 3):
-            if number in board[row][col]:
-                match format:
-                    case 1:
-                        occurs_at.append([row, col]) 
-    return occurs_at
-
-
-def get_n_valued_cells(board, n):
-    cells = []
-    for row in range(BOARD_SIZE):
-        for col in range(BOARD_SIZE):
-            if len(board[row][col]) == n:
-                cells.append([[row, col], board[row][col]])
-    return cells
-
-
+#uber basic
 def remove_candidates(board):
     for row in range(BOARD_SIZE):
         for col in range(BOARD_SIZE):
@@ -69,23 +30,22 @@ def remove_candidates(board):
                                     board[act_row][act_col].remove(to_del)
 
 
-#useless
-def update_candidates(board, given_row, given_col, number):
-    for row in range(BOARD_SIZE):
-        if row != given_row and number in board[row][given_col]:
-            board[row][given_col].remove(number)
-
-    for col in range(BOARD_SIZE):
-        if col != given_col and number in board[given_row][col]:
-            board[given_row][col].remove(number)
-
-    box_row = given_row // 3
-    box_col = given_col // 3
-
-    for row in range(box_row * 3, (box_row + 1) * 3):
-        for col in range(box_col * 3, (box_col + 1) * 3):
-            if row != given_row and col != given_col and number in board[row][col]:
-                board[row][col].remove(number)
+def remove_candidates2(board):
+    singles = get_n_valued_cells(board, 1)
+    for single in singles:
+        number = single[1][0]
+        pos = single[0]
+        for row in range(BOARD_SIZE):
+            if row != pos[0] and number in board[row][pos[1]]:
+                board[row][pos[1]].remove(number)
+        for col in range(BOARD_SIZE):
+            if col != pos[1] and number in board[pos[0]][col]:
+                board[pos[0]][col].remove(number)
+        box = get_numbers_box(pos)
+        for row in range(box[0] * 3, (box[0] + 1) * 3):
+            for col in range(box[1] * 3, (box[1] + 1) * 3):
+                if [row, col] != pos and number in board[row][col]:
+                    board[row][col].remove(number)
 
 
 def hidden_single(board):
@@ -93,23 +53,26 @@ def hidden_single(board):
     for row in range(BOARD_SIZE):
         for number in range(1, 10):
             occurs_at = get_number_in_row(board, number, row, format = 1)
-            if len(occurs_at) == 1:
+            if len(occurs_at) == 1 and len(board[row][occurs_at[0]]) > 1:
                 board[row][occurs_at[0]] = [number]
+                return True
 
     # check for hidden single in a column
     for col in range(BOARD_SIZE):
         for number in range(1, 10):
             occurs_at = get_number_in_column(board, number, col, format = 1)
-            if len(occurs_at) == 1:
+            if len(occurs_at) == 1 and len(board[occurs_at[0]][col]) > 1:
                 board[occurs_at[0]][col] = [number]
+                return True
 
     # check for hidden single in a box
     for row_mult in range(3):
         for col_mult in range(3):
             for number in range(1, 10):
                 occurs_at = get_number_in_box(board, number, row_mult, col_mult, format = 1)
-                if len(occurs_at) == 1:
+                if len(occurs_at) == 1 and len(board[occurs_at[0][0]][occurs_at[0][1]]):
                     board[occurs_at[0][0]][occurs_at[0][1]] = [number]
+                    return True
 
 
 def locked_candidates_pointing(board):
@@ -187,6 +150,7 @@ def locked_candidates_claiming(board):
                                     pass
 
 
+#all basic subset stuff
 def naked_pair(board):
     # box
     for row_mult in range(3):
@@ -247,6 +211,127 @@ def naked_pair(board):
                                 board[new_row][col].remove(second_rem)
 
 
+def naked_triple(board):
+    #row
+    for row in range(BOARD_SIZE):
+        bi_cells = get_n_valued_cells_row(board, row, 2)
+        tri_cells = get_n_valued_cells_row(board, row, 3)
+        cells = bi_cells + tri_cells
+        comb = list(combinations(cells, 3))
+        for triple in comb:
+            digits = set()
+            columns = []
+            for cell in triple:
+                digits = digits | set(cell[1])
+                columns.append(cell[0])
+            digits = list(digits)
+            if len(digits) == 3:
+                for col in (x for x in range(BOARD_SIZE) if x not in columns):
+                    for digit in digits:
+                        if digit in board[row][col]:
+                            board[row][col].remove(digit)
+    #col
+    for col in range(BOARD_SIZE):
+        bi_cells = get_n_valued_cells_col(board, col, 2)
+        tri_cells = get_n_valued_cells_col(board, col, 3)
+        cells = bi_cells + tri_cells
+        comb = list(combinations(cells, 3))
+        for triple in comb:
+            digits = set()
+            rows = []
+            for cell in triple:
+                digits = digits | set(cell[1])
+                rows.append(cell[0])
+            digits = list(digits)
+            if len(digits) == 3:
+                for row in (x for x in range(BOARD_SIZE) if x not in rows):
+                    for digit in digits:
+                        if digit in board[row][col]:
+                            board[row][col].remove(digit)
+    #box
+    for box_row in range(3):
+        for box_col in range(3):
+            bi_cells = get_n_valued_cells_box(board, box_row, box_col, 2)
+            tri_cells = get_n_valued_cells_box(board, box_row, box_col, 3)
+            cells = bi_cells + tri_cells
+            if len(cells) < 3: break
+            comb = list(combinations(cells, 3))
+            for triple in comb:
+                digits = set()
+                points = []
+                for cell in triple:
+                    digits = digits | set(cell[1])
+                    points.append(cell[0])
+                digits = list(digits)
+                if len(digits) == 3:
+                    for row in range(3 * box_row, 3 * (box_row + 1)):
+                        for col in range(3 * box_col, 3 * (box_col + 1)):
+                            if [row, col] not in points:
+                                for digit in digits:
+                                    if digit in board[row][col]:
+                                        board[row][col].remove(digit)
+
+
+def naked_quad(board):
+    #row
+    for row in range(BOARD_SIZE):
+        cells = []
+        for x in range(2, 5):
+            cells += get_n_valued_cells_row(board, row, x)
+        comb = list(combinations(cells, 4))
+        for quad in comb:
+            digits = set()
+            columns = []
+            for cell in quad:
+                digits = digits | set(cell[1])
+                columns.append(cell[0])
+            digits = list(digits)
+            if len(digits) == 4:
+                for col in (x for x in range(BOARD_SIZE) if x not in columns):
+                    for digit in digits:
+                        if digit in board[row][col]:
+                            board[row][col].remove(digit)
+    #col
+    for col in range(BOARD_SIZE):
+        cells = []
+        for x in range(2, 5):
+            cells += get_n_valued_cells_col(board, col, x)
+        comb = list(combinations(cells, 4))
+        for quad in comb:
+            digits = set()
+            rows = []
+            for cell in quad:
+                digits = digits | set(cell[1])
+                rows.append(cell[0])
+            digits = list(digits)
+            if len(digits) == 4:
+                for row in (x for x in range(BOARD_SIZE) if x not in rows):
+                    for digit in digits:
+                        if digit in board[row][col]:
+                            board[row][col].remove(digit)
+    #box
+    for box_row in range(3):
+        for box_col in range(3):
+            cells = []
+            for x in range(2, 5):
+                cells += get_n_valued_cells_box(board, box_row, box_col, x)
+            comb = list(combinations(cells, 4))
+            for quad in comb:
+                digits = set()
+                points = []
+                for cell in quad:
+                    digits = digits | set(cell[1])
+                    points.append(cell[0])
+                digits = list(digits)
+                if len(digits) == 4:
+                    for row in range(3 * box_row, 3 * (box_row + 1)):
+                        for col in range(3 * box_col, 3 * (box_col + 1)):
+                            if [row, col] not in points:
+                                for digit in digits:
+                                    if digit in board[row][col]:
+                                        board[row][col].remove(digit)
+
+
 def hidden_pair(board):
     # box
     def handle_pairs(pairs):
@@ -303,6 +388,129 @@ def hidden_pair(board):
         handle_pairs(pairs)
 
 
+def hidden_triple(board):
+    #row
+    for row in range(BOARD_SIZE):
+        sets = []
+        for number in range(1, 10):
+            positions = get_number_in_row(board, number, row, format = 1)
+            if len(positions) >= 2 and len(positions) <= 3:
+                sets.append([positions, number])
+        combs = list(combinations(sets, 3))
+        for triple in combs:
+            cols = set()
+            nums = []
+            for elem in triple:
+                cols = cols | set(elem[0])
+                nums.append(elem[1])
+            if len(cols) == 3:
+                for col in cols:
+                    for num in (x for x in range(1, 10) if x not in nums):
+                        if num in board[row][col]:
+                            board[row][col].remove(num)
+    # col
+    for col in range(BOARD_SIZE):
+        sets = []
+        for number in range(1, 10):
+            positions = get_number_in_column(board, number, col, format = 1)
+            if len(positions) >= 2 and len(positions) <= 3:
+                sets.append([positions, number])
+        combs = list(combinations(sets, 3))
+        for triple in combs:
+            rows = set()
+            nums = []
+            for elem in triple:
+                rows = rows | set(elem[0])
+                nums.append(elem[1])
+            if len(rows) == 3:
+                for row in rows:
+                    for num in (x for x in range(1, 10) if x not in nums):
+                        if num in board[row][col]:
+                            board[row][col].remove(num)
+                        
+    # box
+    for box_row in range(3):
+        for box_col in range(3):
+            sets = []
+            for number in range(1, 10):
+                positions = get_number_in_box(board, number, box_row, box_col, format = 2)
+                if len(positions) >= 2 and len(positions) <= 3:
+                    sets.append([positions, number])
+            combs = list(combinations(sets, 3))
+            for triple in combs:
+                points = set()
+                nums = []
+                for elem in triple:
+                    points = points | set(elem[0])
+                    nums.append(elem[1])
+                if len(points) == 3:
+                    for point in points:
+                        for num in (x for x in range(1, 10) if x not in nums):
+                            if num in board[point[0]][point[1]]:
+                                board[point[0]][point[1]].remove(num)
+
+
+def hidden_quad(board):
+    #row
+    for row in range(BOARD_SIZE):
+        sets = []
+        for number in range(1, 10):
+            positions = get_number_in_row(board, number, row, format = 1)
+            if len(positions) >= 2 and len(positions) <= 4:
+                sets.append([positions, number])
+        combs = list(combinations(sets, 4))
+        for quad in combs:
+            cols = set()
+            nums = []
+            for elem in quad:
+                cols = cols | set(elem[0])
+                nums.append(elem[1])
+            if len(cols) == 4:
+                for col in cols:
+                    for num in (x for x in range(1, 10) if x not in nums):
+                        if num in board[row][col]:
+                            board[row][col].remove(num)
+    # col
+    for col in range(BOARD_SIZE):
+        sets = []
+        for number in range(1, 10):
+            positions = get_number_in_column(board, number, col, format = 1)
+            if len(positions) >= 2 and len(positions) <= 4:
+                sets.append([positions, number])
+        combs = list(combinations(sets, 4))
+        for quad in combs:
+            rows = set()
+            nums = []
+            for elem in quad:
+                rows = rows | set(elem[0])
+                nums.append(elem[1])
+            if len(rows) == 4:
+                for row in rows:
+                    for num in (x for x in range(1, 10) if x not in nums):
+                        if num in board[row][col]:
+                            board[row][col].remove(num)
+    # box
+    for box_row in range(3):
+        for box_col in range(3):
+            sets = []
+            for number in range(1, 10):
+                positions = get_number_in_box(board, number, box_row, box_col, format = 2)
+                if len(positions) >= 2 and len(positions) <= 4:
+                    sets.append([positions, number])
+            combs = list(combinations(sets, 4))
+            for quad in combs:
+                points = set()
+                nums = []
+                for elem in quad:
+                    points = points | set(elem[0])
+                    nums.append(elem[1])
+                if len(points) == 4:
+                    for point in points:
+                        for num in (x for x in range(1, 10) if x not in nums):
+                            if num in board[point[0]][point[1]]:
+                                board[point[0]][point[1]].remove(num)
+
+#miscellaneus
 def x_wing(board):
     #vertical elimination
     for row in range(BOARD_SIZE - 1):
@@ -310,42 +518,27 @@ def x_wing(board):
             occurs_at = get_number_in_row(board, number, row, format = 1)
             if len(occurs_at) == 2:  #if 2 numbers in row
                 for y in range(row + 1, BOARD_SIZE): #y iterates below the row with 2 numbers
-                    correct = True
-                    if number in board[y][occurs_at[0]] and number in board[y][occurs_at[1]]:
-                        for cell in range(BOARD_SIZE):
-                            if cell not in occurs_at and number in board[y][cell]:
-                                correct = False
-                        if correct:
-                            #elim number from columns: occurs_at       not elim from rows: row and y, 
-                            for cell in range(BOARD_SIZE):
-                                if cell not in [row, y]:
-                                    if number in board[cell][occurs_at[0]]:
-                                        board[cell][occurs_at[0]].remove(number)
-                                    if number in board[cell][occurs_at[1]]:
-                                        board[cell][occurs_at[1]].remove(number)
-                    if correct: 
-                        break
+                    if occurs_at == get_number_in_row(board, number, y, format = 1):
+                        for row_del in range(BOARD_SIZE):
+                            if row_del not in {row, y}:
+                                if number in board[row_del][occurs_at[0]]:
+                                    board[row_del][occurs_at[0]].remove(number)
+                                if number in board[row_del][occurs_at[1]]:
+                                    board[row_del][occurs_at[1]].remove(number)
     #horizontal elimination
     for col in range(BOARD_SIZE - 1):
         for number in range(10):
             occurs_at = get_number_in_column(board, number, col, format = 1)
-            if len(occurs_at) == 2:  #if 2 numbers in column
-                for x in range(col + 1, BOARD_SIZE): #x iterates below the row with 2 numbers
-                    correct = True
-                    if number in board[occurs_at[0]][x] and number in board[occurs_at[1]][x]:
-                        for cell in range(BOARD_SIZE):
-                            if cell not in occurs_at and number in board[cell][x]:
-                                correct = False
-                        if correct:
-                            #elim number from columns: occurs_at       not elim from rows: row and x, 
-                            for cell in range(BOARD_SIZE):
-                                if cell not in [col, x]:
-                                    if number in board[occurs_at[0]][cell]:
-                                        board[occurs_at[0]][cell].remove(number)
-                                    if number in board[occurs_at[1]][cell]:
-                                        board[occurs_at[1]][cell].remove(number)
-                    if correct: 
-                        break
+            if len(occurs_at) == 2:  #if 2 numbers in col
+                for y in range(col + 1, BOARD_SIZE): #y iterates below the row with 2 numbers
+                    if occurs_at == get_number_in_column(board, number, y, format = 1):
+                        for col_del in range(BOARD_SIZE):
+                            if col_del not in {col, y}:
+                                if number in board[occurs_at[0]][col_del]:
+                                    board[occurs_at[0]][col_del].remove(number)
+                                if number in board[occurs_at[1]][col_del]:
+                                    board[occurs_at[1]][col_del].remove(number)
+    return True
 
 
 def skyscraper(board):
@@ -389,3 +582,38 @@ def skyscraper(board):
                             for col in range((3 * box_2[1]), 3 * (box_2[1] + 1)):
                                 if number in board[row_1][col]:
                                     board[row_1][col].remove(number)
+
+
+def kite(board):
+    for number in range(BOARD_SIZE):
+        for row in range(BOARD_SIZE):
+            occurs_at_1 = get_number_in_row(board, number, row, format = 1)
+            if len(occurs_at_1) == 2 and occurs_at_1[0] // 3 != occurs_at_1[1] // 3:
+                occurs_at_2 = []
+                for col in range(3 * (occurs_at_1[0] // 3), 3 * (occurs_at_1[0] // 3 + 1)): #cols in 1st nums box
+                    if col != occurs_at_1[0]:
+                        occurs_at_2 = get_number_in_column(board, number, col, format = 1)
+                        if len(occurs_at_2) == 2 and occurs_at_2[0] // 3 != occurs_at_2[1] // 3:
+                            row_del = -1
+                            if occurs_at_2[0] // 3 == row // 3:
+                                row_del = occurs_at_2[1]
+                            elif occurs_at_2[1] // 3 == row // 3:
+                                row_del = occurs_at_2[0]
+                            col_del = occurs_at_1[1]
+                            if row_del > 1 and number in board[row_del][col_del]:
+                                board[row_del][col_del].remove(number)
+                occurs_at_2 = []
+                for col in range(3 * (occurs_at_1[1] // 3), 3 * (occurs_at_1[1] // 3 + 1)): #cols in 1st nums box
+                    if col != occurs_at_1[1]:
+                        occurs_at_2 = get_number_in_column(board, number, col, format = 1)
+                        if len(occurs_at_2) == 2 and occurs_at_2[0] // 3 != occurs_at_2[1] // 3:
+                            row_del = -1
+                            if occurs_at_2[0] // 3 == row // 3:
+                                row_del = occurs_at_2[1]
+                            elif occurs_at_2[1] // 3 == row // 3:
+                                row_del = occurs_at_2[0]
+                            col_del = occurs_at_1[0]
+                            if row_del > 1 and number in board[row_del][col_del]:
+                                board[row_del][col_del].remove(number)
+                            
+                            

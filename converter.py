@@ -21,6 +21,11 @@ def convert_sudoku_files():
                     line.pop(0)
                     line = " ".join(line)
                     f2.write(str(x + 1) + " " + line + "\n")
+
+
 def strip_sudoku(sudoku):
     return sudoku.split()[1]
-    
+
+
+def get_number(sudoku):
+    return sudoku.split()[0]
