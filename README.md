@@ -9,11 +9,12 @@ Implemented techniques:
 - naked pairs
 - hidden pairs
 - x-wing
+- skyscraper
 
 Current performance status:
 - 100% of easy sudokus solved
 - 100% of medium sudokus solved
-- 42% of hard sudokus solved
+- 51% of hard sudokus solved
 - 0% of diabolical sudokus solved
 
 Average time required to solve 10000 puzzles by difficulty (only counted if 100% of puzzles were solved):
