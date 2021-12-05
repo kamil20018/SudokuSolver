@@ -1,24 +1,15 @@
 from converter import *
 from board import *
-from techniques import *  
+
 from engine import *
 
-AMOUNT_TO_SOLVE = 100
+AMOUNT_TO_SOLVE = 1000
 DIFFICULTY = 2 # 0 - easy, 1 - medium, 2 - hard, 3 - diabolical
 MAX_TO_PRINT = 10
 
 def test_single(str):
     board = Board(str, 0)
-    engine = Engine(board)
-    """ states = engine.states
-    for x in range(len(states)):
-        if x == 0:
-            for line in states[x]:
-                print(line)
-        else:
-            print(states[x][0])
-            for line in states[x][1]:
-                print(line) """
+    engine = Engine(board, 1)
     board.print()
     
 
@@ -36,7 +27,7 @@ with open(f'Puzzle bank\{FILE_NAMES[DIFFICULTY]}_converted.txt', 'r') as f:
     for sudoku in sudokus:
         if AMOUNT_TO_SOLVE == 0: break
         board = Board(strip_sudoku(sudoku), get_number(sudoku))
-        engine = Engine(board)
+        engine = Engine(board, 1)
         if(not board.is_complete()):
             if(board.is_proper()):
                 not_complete += 1
