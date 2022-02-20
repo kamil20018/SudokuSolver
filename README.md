@@ -1,4 +1,6 @@
 # SudokuSolver
+Warning: the size of entire repo is big because of puzzle bank: there are 1000000+ sudokus stored there
+
 Terrible sudoku solver with spaghetti code and performance issues - if it's unable to figure out next step it will stop working, it never makes random guesses
 
 Waring: the performance of current build is much worse - I've modified the way some of the techniques work, so that the logic behind them will be much more visible in the app.
