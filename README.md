@@ -1,7 +1,7 @@
 # SudokuSolver
 Warning: the size of entire repo is big because of puzzle bank: there are 1000000+ sudokus stored there
 
-Terrible sudoku solver with spaghetti code and performance issues - if it's unable to figure out next step it will stop working, it never makes random guesses
+This solver uses pure, human logic to solve sudoku puzzles. It visualizes and names techniquest that it used to solve the puzzle
 
 Waring: the performance of current build is much worse - I've modified the way some of the techniques work, so that the logic behind them will be much more visible in the app.
 If you want the solver to solve puzzles from the puzzle bank, run main.py.
